@@ -1,42 +1,70 @@
 #!/bin/bash
 
+#!/bin/bash
+
+# ----------------------------------------
 # CPU usage = 100 - idle
+# ----------------------------------------
 get_cpu_usage() {
+
 }
 
-# RAM used in MB
+# ----------------------------------------
+# RAM used in MB (macOS uses vm_stat)
+# ----------------------------------------
 get_ram_used() {
+
 }
 
+# ----------------------------------------
 # Total RAM in MB
+# ----------------------------------------
 get_ram_total() {
 }
 
-# MEMORY_USAGE = used / total * 100 (integer math only)
+# ----------------------------------------
+# MEMORY_USAGE = used / total * 100 (integer math)
+# ----------------------------------------
 get_memory_usage_percent() {
 
 }
 
-# Count tasks
+# ----------------------------------------
+# Count tasks (macOS top structure)
+# ----------------------------------------
 get_task_count() {
+
 }
 
+# ----------------------------------------
 # CPU core count
+# ----------------------------------------
 get_cpu_cores() {
+
 }
 
+# ----------------------------------------
 # Disk total MB
+# ----------------------------------------
 get_disk_total() {
+
 }
 
+# ----------------------------------------
 # Disk free MB
+# ----------------------------------------
 get_disk_free() {
+
 }
 
+# ----------------------------------------
 # DISK_FREE % = free / total * 100
+# ----------------------------------------
 get_disk_free_percent() {
+    free=$(get_disk_free)
+    total=$(get_disk_total)
+    echo $(( free * 100 / total ))
 }
-
 
 ########################################
 # Send Metrics via OTLP/JSON
@@ -48,6 +76,7 @@ send_metrics() {
 
     local CPU_USAGE=$(get_cpu_usage)
     local MEMORY_USAGE=$(get_ram_used)
+    local MEMORY_USAGE_PERCENT=$(get_memory_usage_percent)
     local TASKS=$(get_task_count)
     local CORES=$(get_cpu_cores)
     local DISK_FREE=$(get_disk_free)
@@ -58,6 +87,7 @@ send_metrics() {
 
     echo "CPU_USAGE: $CPU_USAGE"
     echo "MEMORY_USAGE: $MEMORY_USAGE"
+    echo "MEMORY_USAGE_PERCENT: $MEMORY_USAGE_PERCENT"
     echo "TASKS: $TASKS"
     echo "CORES: $CORES"
     echo "DISK_FREE: $DISK_FREE"
@@ -87,6 +117,17 @@ send_metrics() {
           "gauge": {
             "dataPoints": [{
               "asDouble": $MEMORY_USAGE,
+              "timeUnixNano": $TIMESTAMP,
+              "attributes": [{ "key": "host", "value": {"stringValue": "$HOST"} }]
+            }]
+          }
+        },
+        {
+          "name": "memory_used",
+          "unit": "percent",
+          "gauge": {
+            "dataPoints": [{
+              "asDouble": $MEMORY_USAGE_PERCENT,
               "timeUnixNano": $TIMESTAMP,
               "attributes": [{ "key": "host", "value": {"stringValue": "$HOST"} }]
             }]
